@@ -1,19 +1,13 @@
 import streamlit as st
 import pandas as pd
-
-# =========================
-# إعداد الصفحة
-# =========================
+from PIL import Image
+from transformers import pipeline
 
 st.set_page_config(
     page_title="PlantCare AI",
     page_icon="🌱",
     layout="wide"
 )
-
-# =========================
-# التصميم
-# =========================
 
 st.markdown("""
 <style>
@@ -26,34 +20,22 @@ st.markdown("""
     font-size: 42px;
     font-weight: bold;
     text-align: center;
-    margin-bottom: 10px;
 }
 
 .subtitle {
     text-align: center;
     font-size: 18px;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
 }
 
-.card {
+.box {
     padding: 20px;
     border-radius: 15px;
     border: 1px solid #ddd;
     margin-bottom: 20px;
 }
-
-.result {
-    padding: 20px;
-    border-radius: 15px;
-    margin-top: 20px;
-    font-size: 20px;
-}
 </style>
 """, unsafe_allow_html=True)
-
-# =========================
-# العنوان
-# =========================
 
 st.markdown(
     '<div class="main-title">🌱 PlantCare AI</div>',
@@ -61,20 +43,24 @@ st.markdown(
 )
 
 st.markdown(
-    '<div class="subtitle">نظام ذكي لمراقبة صحة النباتات</div>',
+    '<div class="subtitle">نظام ذكي للتعرف على النباتات ومراقبة صحتها</div>',
     unsafe_allow_html=True
 )
 
 st.write(
-    "يساعدك النظام على معرفة حالة النبتة اعتمادًا على "
-    "رطوبة التربة والإضاءة ودرجة الحرارة."
+    "📷 صوّري نبتتك وسيحاول النظام التعرف على نوعها، "
+    "ثم يعطيك توصيات مناسبة للعناية بها."
 )
 
 st.divider()
 
-# =========================
-# تصوير النبتة
-# =========================
+# تحميل نموذج التعرف على النباتات
+@st.cache_resource
+def load_model():
+    return pipeline(
+        "image-classification",
+        model="umutbozdag/plant-identity"
+    )
 
 st.markdown("## 📷 صوري نبتتك")
 
@@ -82,190 +68,221 @@ photo = st.camera_input(
     "اضغطي هنا لفتح الكاميرا وتصوير النبتة"
 )
 
+# معلومات العناية بالنباتات الداخلية
+plant_care = {
+    "monstera": {
+        "name": "مونستيرا 🌿",
+        "soil": 40,
+        "light": 50,
+        "min_temp": 18,
+        "max_temp": 30
+    },
+    "pothos": {
+        "name": "بوتس 🌿",
+        "soil": 40,
+        "light": 35,
+        "min_temp": 18,
+        "max_temp": 30
+    },
+    "peace lily": {
+        "name": "زنبق السلام 🌱",
+        "soil": 45,
+        "light": 30,
+        "min_temp": 18,
+        "max_temp": 30
+    },
+    "snake plant": {
+        "name": "سانسيفيريا 🌵",
+        "soil": 20,
+        "light": 35,
+        "min_temp": 15,
+        "max_temp": 32
+    },
+    "zz plant": {
+        "name": "نبتة ZZ 🌿",
+        "soil": 25,
+        "light": 30,
+        "min_temp": 15,
+        "max_temp": 30
+    },
+    "spider plant": {
+        "name": "نبات العنكبوت 🌱",
+        "soil": 40,
+        "light": 40,
+        "min_temp": 15,
+        "max_temp": 27
+    }
+}
+
 if photo is not None:
+
+    image = Image.open(photo).convert("RGB")
+
     st.image(
-        photo,
+        image,
         caption="🌱 صورة النبتة",
         use_container_width=True
     )
 
-    st.success("✅ تم التقاط صورة النبتة بنجاح!")
+    st.success("✅ تم التقاط الصورة!")
 
-st.divider()
+    with st.spinner("🤖 جاري التعرف على النبتة..."):
 
-# =========================
-# بيانات النبتة
-# =========================
+        try:
+            model = load_model()
 
-st.markdown("## 🌿 بيانات النبتة")
+            results = model(image, top_k=3)
 
-plant_type = st.selectbox(
-    "اختاري نوع النبتة:",
-    [
-        "طماطم 🍅",
-        "نعناع 🌿",
-        "ورد 🌹",
-        "صبار 🌵"
-    ]
-)
+            best_result = results[0]
 
-soil = st.slider(
-    "💧 رطوبة التربة (%)",
-    min_value=0,
-    max_value=100,
-    value=50
-)
+            predicted_name = best_result["label"]
+            confidence = best_result["score"] * 100
 
-light = st.slider(
-    "☀️ مستوى الإضاءة (%)",
-    min_value=0,
-    max_value=100,
-    value=60
-)
+            st.markdown("## 🔎 نتيجة التعرف")
 
-temperature = st.number_input(
-    "🌡️ درجة الحرارة (°C)",
-    min_value=-10.0,
-    max_value=60.0,
-    value=25.0,
-    step=0.5
-)
+            st.success(
+                f"🌿 النبتة المتوقعة: **{predicted_name}**"
+            )
 
-# =========================
-# قواعد النباتات
-# =========================
+            st.metric(
+                "نسبة الثقة",
+                f"{confidence:.1f}%"
+            )
 
-rules = {
-    "طماطم 🍅": {
-        "soil": 40,
-        "light": 60,
-        "min_temp": 18,
-        "max_temp": 30
-    },
+            st.markdown("### 🤖 احتمالات التعرف")
 
-    "نعناع 🌿": {
-        "soil": 45,
-        "light": 40,
-        "min_temp": 15,
-        "max_temp": 28
-    },
+            for result in results:
+                st.write(
+                    f"🌱 {result['label']} — "
+                    f"{result['score'] * 100:.1f}%"
+                )
 
-    "ورد 🌹": {
-        "soil": 35,
-        "light": 55,
-        "min_temp": 16,
-        "max_temp": 30
-    },
+            # البحث عن بيانات العناية
+            predicted_lower = predicted_name.lower()
 
-    "صبار 🌵": {
-        "soil": 15,
-        "light": 50,
-        "min_temp": 15,
-        "max_temp": 35
-    }
-}
+            matched_plant = None
 
-rule = rules[plant_type]
+            for key in plant_care:
 
-# =========================
-# التحليل
-# =========================
+                if key in predicted_lower or predicted_lower in key:
+                    matched_plant = plant_care[key]
+                    break
 
-st.divider()
+            if matched_plant:
 
-st.markdown("## 🤖 تحليل حالة النبتة")
+                st.divider()
 
-if st.button("🔎 تحليل النبتة", use_container_width=True):
+                st.markdown("## 🌿 بيانات العناية")
 
-    problems = []
-    recommendations = []
+                soil = st.slider(
+                    "💧 رطوبة التربة (%)",
+                    0,
+                    100,
+                    50
+                )
 
-    # الماء
-    if soil < rule["soil"]:
-        problems.append("💧 التربة جافة وقد تحتاج النبتة إلى ماء.")
-        recommendations.append("اسقي النبتة تدريجيًا وتابعي رطوبة التربة.")
+                light = st.slider(
+                    "☀️ مستوى الإضاءة (%)",
+                    0,
+                    100,
+                    60
+                )
 
-    elif soil > rule["soil"] + 35:
-        problems.append("💦 رطوبة التربة مرتفعة وقد يكون هناك زيادة في الماء.")
-        recommendations.append("خففي الري وتحققي من تصريف الماء.")
+                temperature = st.number_input(
+                    "🌡️ درجة الحرارة (°C)",
+                    -10.0,
+                    60.0,
+                    25.0,
+                    0.5
+                )
 
-    # الإضاءة
-    if light < rule["light"]:
-        problems.append("☀️ الإضاءة منخفضة.")
-        recommendations.append("ضعي النبتة في مكان يحصل على إضاءة مناسبة.")
+                if st.button(
+                    "🔎 تحليل صحة النبتة",
+                    use_container_width=True
+                ):
 
-    # الحرارة
-    if temperature < rule["min_temp"]:
-        problems.append("🥶 درجة الحرارة منخفضة.")
-        recommendations.append("انقلي النبتة إلى مكان أكثر دفئًا.")
+                    problems = []
+                    recommendations = []
 
-    elif temperature > rule["max_temp"]:
-        problems.append("🔥 درجة الحرارة مرتفعة.")
-        recommendations.append("حاولي وضع النبتة في مكان أكثر اعتدالًا.")
+                    if soil < matched_plant["soil"]:
+                        problems.append(
+                            "💧 التربة جافة وقد تحتاج النبتة إلى ماء."
+                        )
+                        recommendations.append(
+                            "اسقي النبتة تدريجيًا وتابعي رطوبة التربة."
+                        )
 
-    # النتيجة
-    if len(problems) == 0:
-        status = "🌱 النبات بحالة جيدة"
-        st.success(status)
+                    elif soil > matched_plant["soil"] + 35:
+                        problems.append(
+                            "💦 رطوبة التربة مرتفعة."
+                        )
+                        recommendations.append(
+                            "خففي الري وتحققي من تصريف الماء."
+                        )
 
-    else:
-        status = "⚠️ توجد بعض الأمور التي تحتاج إلى الانتباه"
-        st.warning(status)
+                    if light < matched_plant["light"]:
+                        problems.append(
+                            "☀️ الإضاءة منخفضة."
+                        )
+                        recommendations.append(
+                            "ضعي النبتة في مكان أكثر إضاءة."
+                        )
 
-    # عرض المشاكل
-    if problems:
+                    if temperature < matched_plant["min_temp"]:
+                        problems.append(
+                            "🥶 درجة الحرارة منخفضة."
+                        )
+                        recommendations.append(
+                            "انقلي النبتة إلى مكان أكثر دفئًا."
+                        )
 
-        st.markdown("### 🔍 الملاحظات")
+                    elif temperature > matched_plant["max_temp"]:
+                        problems.append(
+                            "🔥 درجة الحرارة مرتفعة."
+                        )
+                        recommendations.append(
+                            "ضعي النبتة في مكان أكثر اعتدالًا."
+                        )
 
-        for problem in problems:
-            st.write(problem)
+                    st.markdown("## 🌱 حالة النبتة")
 
-    # التوصيات
-    if recommendations:
+                    if not problems:
+                        st.success(
+                            "🌱 النبات بحالة جيدة!"
+                        )
+                    else:
+                        st.warning(
+                            "⚠️ توجد بعض الأمور التي تحتاج إلى الانتباه."
+                        )
 
-        st.markdown("### 💡 التوصيات")
+                    if problems:
 
-        for recommendation in recommendations:
-            st.write("• " + recommendation)
+                        st.markdown("### 🔍 الملاحظات")
 
-    else:
+                        for problem in problems:
+                            st.write(problem)
 
-        st.info(
-            "استمري على روتين العناية الحالي وراقبي النبتة بشكل مستمر."
-        )
+                    if recommendations:
 
-    # =========================
-    # جدول البيانات
-    # =========================
+                        st.markdown("### 💡 التوصيات")
 
-    st.markdown("### 📊 بيانات التحليل")
+                        for recommendation in recommendations:
+                            st.write("• " + recommendation)
 
-    data = {
-        "العنصر": [
-            "نوع النبتة",
-            "رطوبة التربة",
-            "الإضاءة",
-            "درجة الحرارة"
-        ],
-        "القيمة": [
-            plant_type,
-            f"{soil}%",
-            f"{light}%",
-            f"{temperature}°C"
-        ]
-    }
+            else:
 
-    df = pd.DataFrame(data)
+                st.info(
+                    "ℹ️ تم التعرف على النبتة، "
+                    "لكن لا توجد لدينا بيانات عناية مخصصة لها حاليًا."
+                )
 
-    st.dataframe(
-        df,
-        use_container_width=True,
-        hide_index=True
-    )
+        except Exception as e:
 
-# =========================
-# معلومات المشروع
-# =========================
+            st.error(
+                "❌ حدث خطأ أثناء التعرف على النبتة."
+            )
+
+            st.write(str(e))
 
 st.divider()
 
@@ -273,14 +290,15 @@ st.markdown("## ℹ️ عن المشروع")
 
 st.write("""
 PlantCare AI هو نموذج أولي لنظام ذكي يساعد أصحاب النباتات
-على متابعة حالة نباتاتهم.
+على التعرف على نباتاتهم ومتابعة احتياجاتها.
 
-يعتمد النظام على تحليل بيانات رطوبة التربة والإضاءة ودرجة الحرارة
-وفقًا لاحتياجات كل نوع من النباتات.
+📷 يستخدم صورة النبتة للتعرف على نوعها.
 
-📷 يمكن استخدام الكاميرا لالتقاط صورة للنبتة.
+🤖 يستخدم نموذج تعلم آلي للتعرف على النبات.
 
-🤖 التحليل الحالي يعتمد على قواعد ذكية محددة لكل نوع نبات،
-ويمكن تطوير المشروع مستقبلًا باستخدام نماذج تعلم آلي ورؤية حاسوبية
-للتعرف على النبات وتحليل الصور تلقائيًا.
+🌱 بعد التعرف على النبات، يستخدم النظام بيانات العناية
+لتقديم توصيات حول الماء والإضاءة ودرجة الحرارة.
+
+🚀 يمكن تطوير المشروع مستقبلًا ليشمل التعرف على أمراض النباتات
+وتحليل صور الأوراق بشكل أكثر دقة.
 """)
