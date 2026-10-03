@@ -470,16 +470,4 @@ if photo is not None:
        
            st.markdown("## 📷 صوري نبتتك")
 
-photo = st.camera_input("اضغطي هنا لفتح الكاميرا وتصوير النبتة")
 
-if photo is not None:
-    st.image(photo, caption="🌱 صورة النبتة", use_container_width=True)
-    st.success("✅ تم التقاط صورة النبتة بنجاح!")
-
-    st.info("""
-🌱 تم التقاط الصورة بنجاح.
-
-يمكنك استخدام بيانات رطوبة التربة 💧
-والإضاءة ☀️ ودرجة الحرارة 🌡️
-لتحليل حالة النبتة وتقديم توصيات مناسبة.
-""")
