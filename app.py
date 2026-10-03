@@ -457,3 +457,49 @@ photo = st.camera_input("اضغطي هنا لفتح الكاميرا وتصوي�
 
 if photo is not None:
     st.image(photo, caption="🌱 صورة النبتة", use_container_width=True)
+
+    import base64
+    from openai import OpenAI
+
+    image_bytes = photo.getvalue()
+    base64_image = base64.b64encode(image_bytes).decode("utf-8")
+
+    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+    with st.spinner("🔎 جاري تحليل النبتة..."):
+        response = client.responses.create(
+            model="gpt-6-astra",
+            input=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "input_text",
+                            "text": """
+حلل صورة النبتة باللغة العربية.
+
+حدد:
+1. النوع المتوقع للنبتة.
+2. حالتها الظاهرة.
+3. هل توجد علامات على احتياجها للماء؟
+4. هل توجد علامات على زيادة الماء؟
+5. هل توجد علامات محتملة على نقص المغذيات؟
+6. هل تبدو بحاجة إلى إضاءة أكثر؟
+7. أعطني نصيحة مختصرة للعناية بها.
+
+مهم: الصورة لا تستطيع قياس رطوبة التربة أو درجة الحرارة مباشرة.
+استخدم "قد تحتاج" و"علامات محتملة" عند عدم التأكد.
+النتيجة إرشادية وليست تشخيصًا زراعيًا نهائيًا.
+"""
+                        },
+                        {
+                            "type": "input_image",
+                            "image_url": f"data:image/jpeg;base64,{base64_image}"
+                        }
+                    ]
+                }
+            ]
+        )
+
+    st.markdown("### 🌿 نتيجة التحليل")
+    st.write(response.output_text)
