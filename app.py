@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
 
-# ==============================
+# =========================
 # إعداد الصفحة
-# ==============================
+# =========================
 
 st.set_page_config(
     page_title="PlantCare AI",
@@ -11,112 +11,153 @@ st.set_page_config(
     layout="wide"
 )
 
-# ==============================
+# =========================
 # التصميم
-# ==============================
+# =========================
 
 st.markdown("""
 <style>
-
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
-
-html, body, [class*="css"] {
-    font-family: 'Cairo', sans-serif;
-}
-
 .stApp {
-    background: linear-gradient(135deg, #f5faf5, #eef7f0);
-}
-
-.block-container {
-    padding-top: 2rem;
-    padding-bottom: 3rem;
+    direction: rtl;
+    text-align: right;
 }
 
 .main-title {
+    font-size: 42px;
+    font-weight: bold;
     text-align: center;
-    padding: 20px;
+    margin-bottom: 10px;
 }
 
-.main-title h1 {
-    font-size: 44px;
-    font-weight: 800;
-    margin-bottom: 5px;
-}
-
-.main-title p {
-    color: #64748b;
+.subtitle {
+    text-align: center;
     font-size: 18px;
+    margin-bottom: 30px;
 }
 
 .card {
-    background: white;
-    padding: 25px;
-    border-radius: 22px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.06);
-    border: 1px solid #e5eee7;
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid #ddd;
     margin-bottom: 20px;
 }
 
-.good {
-    background: #ecfdf3;
-    border: 1px solid #bbf7d0;
-    padding: 25px;
-    border-radius: 20px;
-    text-align: center;
-}
-
-.warning {
-    background: #fff8e7;
-    border: 1px solid #fde68a;
-    padding: 25px;
-    border-radius: 20px;
-}
-
-.result-title {
-    font-size: 27px;
-    font-weight: 800;
-}
-
-.info-box {
-    background: #f8fafc;
-    padding: 18px;
+.result {
+    padding: 20px;
     border-radius: 15px;
-    border: 1px solid #e2e8f0;
+    margin-top: 20px;
+    font-size: 20px;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
+# =========================
+# العنوان
+# =========================
 
-# ==============================
-# بيانات النباتات
-# ==============================
+st.markdown(
+    '<div class="main-title">🌱 PlantCare AI</div>',
+    unsafe_allow_html=True
+)
 
-plants = {
+st.markdown(
+    '<div class="subtitle">نظام ذكي لمراقبة صحة النباتات</div>',
+    unsafe_allow_html=True
+)
 
-    "🍅 طماطم": {
+st.write(
+    "يساعدك النظام على معرفة حالة النبتة اعتمادًا على "
+    "رطوبة التربة والإضاءة ودرجة الحرارة."
+)
+
+st.divider()
+
+# =========================
+# تصوير النبتة
+# =========================
+
+st.markdown("## 📷 صوري نبتتك")
+
+photo = st.camera_input(
+    "اضغطي هنا لفتح الكاميرا وتصوير النبتة"
+)
+
+if photo is not None:
+    st.image(
+        photo,
+        caption="🌱 صورة النبتة",
+        use_container_width=True
+    )
+
+    st.success("✅ تم التقاط صورة النبتة بنجاح!")
+
+st.divider()
+
+# =========================
+# بيانات النبتة
+# =========================
+
+st.markdown("## 🌿 بيانات النبتة")
+
+plant_type = st.selectbox(
+    "اختاري نوع النبتة:",
+    [
+        "طماطم 🍅",
+        "نعناع 🌿",
+        "ورد 🌹",
+        "صبار 🌵"
+    ]
+)
+
+soil = st.slider(
+    "💧 رطوبة التربة (%)",
+    min_value=0,
+    max_value=100,
+    value=50
+)
+
+light = st.slider(
+    "☀️ مستوى الإضاءة (%)",
+    min_value=0,
+    max_value=100,
+    value=60
+)
+
+temperature = st.number_input(
+    "🌡️ درجة الحرارة (°C)",
+    min_value=-10.0,
+    max_value=60.0,
+    value=25.0,
+    step=0.5
+)
+
+# =========================
+# قواعد النباتات
+# =========================
+
+rules = {
+    "طماطم 🍅": {
         "soil": 40,
         "light": 60,
         "min_temp": 18,
         "max_temp": 30
     },
 
-    "🌿 نعناع": {
+    "نعناع 🌿": {
         "soil": 45,
         "light": 40,
         "min_temp": 15,
         "max_temp": 28
     },
 
-    "🌹 ورد": {
+    "ورد 🌹": {
         "soil": 35,
         "light": 55,
         "min_temp": 16,
         "max_temp": 30
     },
 
-    "🌵 صبار": {
+    "صبار 🌵": {
         "soil": 15,
         "light": 50,
         "min_temp": 15,
@@ -124,350 +165,122 @@ plants = {
     }
 }
 
+rule = rules[plant_type]
 
-# ==============================
-# العنوان
-# ==============================
-
-st.markdown("""
-<div class="main-title">
-
-<h1>🌱 PlantCare AI</h1>
-
-<p>
-نظام ذكي لمراقبة صحة النباتات وتحليل احتياجاتها
-</p>
-
-</div>
-""", unsafe_allow_html=True)
+# =========================
+# التحليل
+# =========================
 
 st.divider()
 
+st.markdown("## 🤖 تحليل حالة النبتة")
 
-# ==============================
-# تعريف المشروع
-# ==============================
-
-st.markdown("""
-<div class="card">
-
-<h3>🌿 مرحبًا بك في PlantCare AI</h3>
-
-<p>
-يساعدك النظام على معرفة حالة نباتك من خلال تحليل
-رطوبة التربة ودرجة الحرارة وكمية الإضاءة.
-بعد إدخال البيانات، يقوم النظام بتحليلها وتقديم
-توصية مناسبة للعناية بالنبات.
-</p>
-
-</div>
-""", unsafe_allow_html=True)
-
-
-# ==============================
-# الأعمدة الرئيسية
-# ==============================
-
-input_col, result_col = st.columns([1, 1.4])
-
-
-# ==============================
-# إدخال البيانات
-# ==============================
-
-with input_col:
-
-    st.markdown("""
-    <div class="card">
-
-    <h3>📋 بيانات النبات</h3>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-    plant = st.selectbox(
-        "🌿 اختر نوع النبات",
-        list(plants.keys())
-    )
-
-    soil = st.slider(
-        "💧 رطوبة التربة",
-        0,
-        100,
-        50,
-        help="نسبة رطوبة التربة الحالية"
-    )
-
-    temperature = st.slider(
-        "🌡️ درجة الحرارة",
-        0,
-        50,
-        25,
-        help="درجة الحرارة المحيطة بالنبات"
-    )
-
-    light = st.slider(
-        "☀️ مستوى الإضاءة",
-        0,
-        100,
-        70,
-        help="نسبة كمية الضوء المتوفرة للنبات"
-    )
-
-    analyze = st.button(
-        "🔍 تحليل صحة النبات",
-        use_container_width=True
-    )
-
-
-# ==============================
-# القراءات
-# ==============================
-
-with result_col:
-
-    st.markdown("""
-    <div class="card">
-
-    <h3>📊 القراءات الحالية</h3>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.metric(
-            "💧 الرطوبة",
-            f"{soil}%"
-        )
-
-    with col2:
-        st.metric(
-            "🌡️ الحرارة",
-            f"{temperature}°C"
-        )
-
-    with col3:
-        st.metric(
-            "☀️ الإضاءة",
-            f"{light}%"
-        )
-
-    chart = pd.DataFrame({
-        "المؤشر": [
-            "رطوبة التربة",
-            "الإضاءة"
-        ],
-        "النسبة": [
-            soil,
-            light
-        ]
-    })
-
-    st.bar_chart(
-        chart,
-        x="المؤشر",
-        y="النسبة"
-    )
-
-
-# ==============================
-# التحليل
-# ==============================
-
-if analyze:
-
-    plant_data = plants[plant]
+if st.button("🔎 تحليل النبتة", use_container_width=True):
 
     problems = []
     recommendations = []
 
-    # فحص الرطوبة
+    # الماء
+    if soil < rule["soil"]:
+        problems.append("💧 التربة جافة وقد تحتاج النبتة إلى ماء.")
+        recommendations.append("اسقي النبتة تدريجيًا وتابعي رطوبة التربة.")
 
-    if soil < plant_data["soil"]:
+    elif soil > rule["soil"] + 35:
+        problems.append("💦 رطوبة التربة مرتفعة وقد يكون هناك زيادة في الماء.")
+        recommendations.append("خففي الري وتحققي من تصريف الماء.")
 
-        problems.append(
-            "💧 رطوبة التربة منخفضة"
-        )
+    # الإضاءة
+    if light < rule["light"]:
+        problems.append("☀️ الإضاءة منخفضة.")
+        recommendations.append("ضعي النبتة في مكان يحصل على إضاءة مناسبة.")
 
-        recommendations.append(
-            "قم بري النبات وزيادة رطوبة التربة."
-        )
+    # الحرارة
+    if temperature < rule["min_temp"]:
+        problems.append("🥶 درجة الحرارة منخفضة.")
+        recommendations.append("انقلي النبتة إلى مكان أكثر دفئًا.")
 
-    # فحص الإضاءة
+    elif temperature > rule["max_temp"]:
+        problems.append("🔥 درجة الحرارة مرتفعة.")
+        recommendations.append("حاولي وضع النبتة في مكان أكثر اعتدالًا.")
 
-    if light < plant_data["light"]:
-
-        problems.append(
-            "☀️ مستوى الإضاءة منخفض"
-        )
-
-        recommendations.append(
-            "ضع النبات في مكان يحصل على إضاءة أكثر."
-        )
-
-    # فحص الحرارة
-
-    if temperature < plant_data["min_temp"]:
-
-        problems.append(
-            "🥶 درجة الحرارة منخفضة"
-        )
-
-        recommendations.append(
-            "حاول وضع النبات في مكان أكثر دفئًا."
-        )
-
-    elif temperature > plant_data["max_temp"]:
-
-        problems.append(
-            "🔥 درجة الحرارة مرتفعة"
-        )
-
-        recommendations.append(
-            "أبعد النبات عن مصدر الحرارة وحاول تبريد المكان."
-        )
-
-
-    # ==============================
-    # عرض النتيجة
-    # ==============================
-
-    st.divider()
-
-    st.subheader("🤖 نتيجة التحليل الذكي")
-
-
+    # النتيجة
     if len(problems) == 0:
+        status = "🌱 النبات بحالة جيدة"
+        st.success(status)
 
-        st.markdown("""
-        <div class="good">
+    else:
+        status = "⚠️ توجد بعض الأمور التي تحتاج إلى الانتباه"
+        st.warning(status)
 
-        <div class="result-title">
-        🌱 النبات بحالة ممتازة
-        </div>
+    # عرض المشاكل
+    if problems:
 
-        <p>
-        جميع المؤشرات الحالية مناسبة للنبات.
-        استمر في المحافظة على هذه الظروف.
-        </p>
+        st.markdown("### 🔍 الملاحظات")
 
-        </div>
-        """, unsafe_allow_html=True)
+        for problem in problems:
+            st.write(problem)
 
-        st.success(
-            "تم تحليل البيانات بنجاح ✅"
-        )
+    # التوصيات
+    if recommendations:
 
+        st.markdown("### 💡 التوصيات")
+
+        for recommendation in recommendations:
+            st.write("• " + recommendation)
 
     else:
 
-        st.markdown("""
-        <div class="warning">
+        st.info(
+            "استمري على روتين العناية الحالي وراقبي النبتة بشكل مستمر."
+        )
 
-        <div class="result-title">
-        ⚠️ النبات يحتاج إلى عناية
-        </div>
+    # =========================
+    # جدول البيانات
+    # =========================
 
-        <p>
-        تم اكتشاف بعض المؤشرات التي تحتاج إلى تحسين.
-        </p>
+    st.markdown("### 📊 بيانات التحليل")
 
-        </div>
-        """, unsafe_allow_html=True)
+    data = {
+        "العنصر": [
+            "نوع النبتة",
+            "رطوبة التربة",
+            "الإضاءة",
+            "درجة الحرارة"
+        ],
+        "القيمة": [
+            plant_type,
+            f"{soil}%",
+            f"{light}%",
+            f"{temperature}°C"
+        ]
+    }
 
+    df = pd.DataFrame(data)
 
-        st.write("### 🔎 المشكلات المكتشفة")
+    st.dataframe(
+        df,
+        use_container_width=True,
+        hide_index=True
+    )
 
-        for problem in problems:
-
-            st.warning(problem)
-
-
-        st.write("### 💡 التوصيات")
-
-        for recommendation in recommendations:
-
-            st.info(recommendation)
-
-
-# ==============================
+# =========================
 # معلومات المشروع
-# ==============================
+# =========================
 
 st.divider()
 
-st.markdown("""
-<div class="card">
+st.markdown("## ℹ️ عن المشروع")
 
-<h3>🧠 معلومات المشروع</h3>
+st.write("""
+PlantCare AI هو نموذج أولي لنظام ذكي يساعد أصحاب النباتات
+على متابعة حالة نباتاتهم.
 
-<div class="info-box">
+يعتمد النظام على تحليل بيانات رطوبة التربة والإضاءة ودرجة الحرارة
+وفقًا لاحتياجات كل نوع من النباتات.
 
-<p>
-<strong>المشكلة:</strong>
-صعوبة معرفة احتياجات النبات بشكل دقيق.
-</p>
+📷 يمكن استخدام الكاميرا لالتقاط صورة للنبتة.
 
-<p>
-<strong>المدخلات:</strong>
-نوع النبات، رطوبة التربة، درجة الحرارة، والإضاءة.
-</p>
-
-<p>
-<strong>التحليل:</strong>
-مقارنة البيانات المدخلة بالاحتياجات المناسبة لكل نوع من النباتات.
-</p>
-
-<p>
-<strong>المخرجات:</strong>
-حالة النبات والتوصيات المناسبة للعناية به.
-</p>
-
-<p>
-<strong>الفئة المستفيدة:</strong>
-أصحاب النباتات، المزارعون، والمهتمون بالزراعة.
-</p>
-
-</div>
-
-</div>
-""", unsafe_allow_html=True)
-
-
-# ==============================
-# التذييل
-# ==============================
-
-st.markdown("""
-<div style="text-align:center; color:#64748b; padding:20px;">
-
-🌱 PlantCare AI
-
-<br>
-
-نظام ذكي لمراقبة صحة النباتات
-
-</div>
-""", unsafe_allow_html=True)
-st.markdown("## 📷 صوري نبتتك")
-
-photo = st.camera_input("اضغطي هنا لفتح الكاميرا وتصوير النبتة")
-
-if photo is not None:
-    st.image(photo, caption="🌱 صورة النبتة", use_container_width=True)
-
-    import base64
-    from openai import OpenAI
-
-    image_bytes = photo.getvalue()
-    base64_image = base64.b64encode(image_bytes).decode("utf-8")
-
-    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
-    with st.spinner("🔎 جاري تحليل النبتة..."):
-       
-           st.markdown("## 📷 صوري نبتتك")
-
-
+🤖 التحليل الحالي يعتمد على قواعد ذكية محددة لكل نوع نبات،
+ويمكن تطوير المشروع مستقبلًا باستخدام نماذج تعلم آلي ورؤية حاسوبية
+للتعرف على النبات وتحليل الصور تلقائيًا.
+""")
