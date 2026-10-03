@@ -467,7 +467,7 @@ if photo is not None:
     client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
     with st.spinner("🔎 جاري تحليل النبتة..."):
-        response = client.responses.create(
+       
            st.markdown("## 📷 صوري نبتتك")
 
 photo = st.camera_input("اضغطي هنا لفتح الكاميرا وتصوير النبتة")
