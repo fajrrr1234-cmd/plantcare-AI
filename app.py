@@ -138,7 +138,7 @@ if photo is not None:
 
             model = load_model()
 
-       transform = transforms.Compose([
+            transform = transforms.Compose([
             transforms.Resize(256),
             transforms.CenterCrop(224),
             transforms.ToTensor(),
@@ -149,11 +149,11 @@ if photo is not None:
         ])
 
 # تجهيز الصورة للنموذج
-input_tensor = transform(image).unsqueeze(0)
+           input_tensor = transform(image).unsqueeze(0)
 
 # تشغيل النموذج
-with torch.no_grad():
-    logits = model(input_tensor)
+           with torch.no_grad():
+        logits = model(input_tensor)
     probs = torch.softmax(logits, dim=1)[0]
     top5 = probs.topk(5)
 
