@@ -1,7 +1,10 @@
 import streamlit as st
 import pandas as pd
 from PIL import Image
-from transformers import pipeline
+import torch
+import torchvision.models as models
+import torchvision.transforms as transforms
+from huggingface_hub import hf_hub_download
 
 st.set_page_config(
     page_title="PlantCare AI",
@@ -49,10 +52,19 @@ st.divider()
 # تحميل نموذج التعرف مرة واحدة
 @st.cache_resource
 def load_model():
-    return pipeline(
-        "image-classification",
-        model="umutbozdag/plant-identity"
+    model = models.resnet18(weights=None, num_classes=1081)
+
+    model_path = hf_hub_download(
+        repo_id="cpoisson/plantnet300k-resnet18",
+        filename="plantnet_resnet18.pth"
     )
+
+    model.load_state_dict(
+        torch.load(model_path, map_location="cpu", weights_only=True)
+    )
+
+    model.eval()
+    return model
 
 # بيانات العناية
 plant_data = {
@@ -126,21 +138,69 @@ if photo is not None:
 
             model = load_model()
 
-            results = model(image, top_k=5)
+          transform = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225]
+    )
+])
 
-            best = results[0]
+# تجهيز الصورة للنموذج
+input_tensor = transform(image).unsqueeze(0)
 
-            label = best["label"]
-            confidence = best["score"] * 100
+# تشغيل النموذج
+with torch.no_grad():
+    logits = model(input_tensor)
+    probs = torch.softmax(logits, dim=1)[0]
+    top5 = probs.topk(5)
 
-            # البحث عن النبات المطابق
-            matched = None
+# تحميل أسماء أنواع النباتات
+labels_path = hf_hub_download(
+    repo_id="cpoisson/plantnet300k-resnet18",
+    filename="plantnet300K_species_id_2_name.json"
+)
 
-            for key in plant_data:
+import json
 
-                if key.lower() in label.lower() or label.lower() in key.lower():
-                    matched = plant_data[key]
-                    break
+with open(labels_path, "r", encoding="utf-8") as f:
+    species_map = json.load(f)
+
+labels = [species_map[key] for key in sorted(species_map)]
+
+# تجهيز النتائج
+results = []
+
+for score, index in zip(top5.values, top5.indices):
+    results.append({
+        "label": labels[index.item()],
+        "score": score.item()
+    })
+
+best = results[0]
+
+label = best["label"]
+confidence = best["score"] * 100
+
+           # مطابقة الاسم العلمي مع اسم النبات في المشروع
+plant_aliases = {
+    "Epipremnum aureum": "Pothos",
+    "Monstera deliciosa": "Monstera deliciosa",
+    "Dracaena trifasciata": "Snake plant",
+    "Sansevieria trifasciata": "Snake plant",
+    "Spathiphyllum wallisii": "Peace lily",
+    "Chlorophytum comosum": "Spider plant",
+    "Zamioculcas zamiifolia": "ZZ plant"
+}
+
+matched = None
+
+for scientific_name, plant_key in plant_aliases.items():
+    if scientific_name.lower() in label.lower():
+        matched = plant_data[plant_key]
+        break
 
             if matched is not None:
 
