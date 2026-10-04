@@ -20,7 +20,7 @@ st.set_page_config(
 
 
 # =========================
-# تنسيق الصفحة
+# التصميم
 # =========================
 
 st.markdown("""
@@ -47,6 +47,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+# =========================
+# العنوان
+# =========================
+
 st.markdown(
     '<div class="title">🌱 PlantCare AI</div>',
     unsafe_allow_html=True
@@ -65,7 +69,7 @@ st.divider()
 
 
 # =========================
-# تحميل نموذج الذكاء الاصطناعي
+# نموذج الذكاء الاصطناعي
 # =========================
 
 @st.cache_resource
@@ -95,7 +99,38 @@ def load_model():
 
 
 # =========================
-# بيانات النباتات والعناية بها
+# تحميل أسماء النباتات
+# =========================
+
+@st.cache_data
+def load_labels():
+
+    labels_path = hf_hub_download(
+        repo_id="cpoisson/plantnet300k-resnet18",
+        filename="plantnet300K_species_id_2_name.json"
+    )
+
+    with open(
+        labels_path,
+        "r",
+        encoding="utf-8"
+    ) as f:
+
+        species_map = json.load(f)
+
+    labels = [
+        species_map[key]
+        for key in sorted(
+            species_map,
+            key=lambda x: int(x)
+        )
+    ]
+
+    return labels
+
+
+# =========================
+# بيانات النباتات
 # =========================
 
 plant_data = {
@@ -148,18 +183,122 @@ plant_data = {
         "max_temp": 30
     },
 
-    "Peperomia serpens": {
-        "name": "بيبروميا سيربنز 🌿",
+    "Peperomia": {
+        "name": "البيبروميا 🌿",
         "soil": 35,
-        "light": 45,
+        "light": 40,
         "min_temp": 18,
         "max_temp": 30
+    },
+
+    "Bamboo": {
+        "name": "ساق البامبو 🎋",
+        "soil": 40,
+        "light": 30,
+        "min_temp": 18,
+        "max_temp": 30
+    },
+
+    "Aloe vera": {
+        "name": "الألوفيرا 🌵",
+        "soil": 20,
+        "light": 65,
+        "min_temp": 15,
+        "max_temp": 30
+    },
+
+    "Rubber plant": {
+        "name": "نبات المطاط 🌿",
+        "soil": 40,
+        "light": 50,
+        "min_temp": 18,
+        "max_temp": 30
+    },
+
+    "Fiddle leaf fig": {
+        "name": "فيكس ليراتا 🌿",
+        "soil": 40,
+        "light": 65,
+        "min_temp": 18,
+        "max_temp": 30
+    },
+
+    "Calathea": {
+        "name": "الكالاتيا 🌿",
+        "soil": 50,
+        "light": 30,
+        "min_temp": 18,
+        "max_temp": 30
+    },
+
+    "Fittonia": {
+        "name": "الفيتونيا 🌿",
+        "soil": 50,
+        "light": 30,
+        "min_temp": 18,
+        "max_temp": 28
+    },
+
+    "Jade plant": {
+        "name": "نبات اليشم 🌱",
+        "soil": 20,
+        "light": 60,
+        "min_temp": 15,
+        "max_temp": 30
+    },
+
+    "Dracaena": {
+        "name": "الدراسينا 🌿",
+        "soil": 35,
+        "light": 35,
+        "min_temp": 18,
+        "max_temp": 30
+    },
+
+    "Anthurium": {
+        "name": "الأنثوريوم 🌺",
+        "soil": 50,
+        "light": 40,
+        "min_temp": 18,
+        "max_temp": 30
+    },
+
+    "Boston fern": {
+        "name": "سرخس بوسطن 🌿",
+        "soil": 60,
+        "light": 35,
+        "min_temp": 16,
+        "max_temp": 27
+    },
+
+    "Philodendron": {
+        "name": "الفيلودندرون 🌿",
+        "soil": 45,
+        "light": 40,
+        "min_temp": 18,
+        "max_temp": 30
+    },
+
+    "Dieffenbachia": {
+        "name": "الديفنباخيا 🌿",
+        "soil": 45,
+        "light": 35,
+        "min_temp": 18,
+        "max_temp": 30
+    },
+
+    "Begonia": {
+        "name": "البيغونيا 🌸",
+        "soil": 45,
+        "light": 40,
+        "min_temp": 18,
+        "max_temp": 28
     }
 }
 
 
 # =========================
-# ربط الأسماء العلمية
+# الأسماء العلمية
 # =========================
 
 plant_aliases = {
@@ -178,7 +317,39 @@ plant_aliases = {
 
     "Zamioculcas zamiifolia": "ZZ plant",
 
-    "Peperomia serpens": "Peperomia serpens"
+    "Peperomia": "Peperomia",
+
+    "Peperomia serpens": "Peperomia",
+
+    "Peperomia obtusifolia": "Peperomia",
+
+    "Dracaena sanderiana": "Bamboo",
+
+    "Dracaena braunii": "Bamboo",
+
+    "Aloe vera": "Aloe vera",
+
+    "Ficus elastica": "Rubber plant",
+
+    "Ficus lyrata": "Fiddle leaf fig",
+
+    "Calathea": "Calathea",
+
+    "Fittonia": "Fittonia",
+
+    "Crassula ovata": "Jade plant",
+
+    "Dracaena": "Dracaena",
+
+    "Anthurium andraeanum": "Anthurium",
+
+    "Nephrolepis exaltata": "Boston fern",
+
+    "Philodendron": "Philodendron",
+
+    "Dieffenbachia": "Dieffenbachia",
+
+    "Begonia": "Begonia"
 }
 
 
@@ -192,6 +363,10 @@ photo = st.camera_input(
     "اضغطي هنا لفتح الكاميرا وتصوير النبتة"
 )
 
+
+# =========================
+# تحليل الصورة
+# =========================
 
 if photo is not None:
 
@@ -211,17 +386,10 @@ if photo is not None:
 
         try:
 
-            # =========================
             # تحميل النموذج
-            # =========================
-
             model = load_model()
 
-
-            # =========================
             # تجهيز الصورة
-            # =========================
-
             transform = transforms.Compose([
 
                 transforms.Resize(256),
@@ -236,17 +404,17 @@ if photo is not None:
                 )
             ])
 
+            input_tensor = transform(
+                image
+            ).unsqueeze(0)
 
-            input_tensor = transform(image).unsqueeze(0)
 
-
-            # =========================
-            # تشغيل الذكاء الاصطناعي
-            # =========================
-
+            # تشغيل النموذج
             with torch.no_grad():
 
-                logits = model(input_tensor)
+                logits = model(
+                    input_tensor
+                )
 
                 probs = torch.softmax(
                     logits,
@@ -256,38 +424,11 @@ if photo is not None:
                 top5 = probs.topk(5)
 
 
-            # =========================
-            # تحميل أسماء النباتات
-            # =========================
-
-            labels_path = hf_hub_download(
-                repo_id="cpoisson/plantnet300k-resnet18",
-                filename="plantnet300K_species_id_2_name.json"
-            )
+            # تحميل أسماء الأنواع
+            labels = load_labels()
 
 
-            with open(
-                labels_path,
-                "r",
-                encoding="utf-8"
-            ) as f:
-
-                species_map = json.load(f)
-
-
-            labels = [
-                species_map[key]
-                for key in sorted(
-                    species_map,
-                    key=lambda x: int(x)
-                )
-            ]
-
-
-            # =========================
             # تجهيز النتائج
-            # =========================
-
             results = []
 
             for score, index in zip(
@@ -304,6 +445,7 @@ if photo is not None:
                 })
 
 
+            # أفضل نتيجة
             best = results[0]
 
             label = best["label"]
@@ -312,11 +454,10 @@ if photo is not None:
 
 
             # =========================
-            # البحث عن النبات
+            # مطابقة النبات
             # =========================
 
             matched = None
-
 
             for scientific_name, plant_key in plant_aliases.items():
 
@@ -328,7 +469,7 @@ if photo is not None:
 
 
             # =========================
-            # عرض النتيجة
+            # النتيجة
             # =========================
 
             if matched is not None:
@@ -338,10 +479,9 @@ if photo is not None:
                 )
 
                 st.metric(
-                    "🎯 نسبة الثقة",
+                    "نسبة الثقة",
                     f"{confidence:.1f}%"
                 )
-
 
             else:
 
@@ -350,7 +490,8 @@ if photo is not None:
                 )
 
                 st.info(
-                    "هذه النبتة غير مضافة إلى قاعدة العناية في المشروع حاليًا."
+                    "هذه النبتة تم التعرف عليها، "
+                    "لكن بيانات العناية بها غير مضافة للمشروع حاليًا."
                 )
 
 
@@ -369,7 +510,7 @@ if photo is not None:
 
 
             # =========================
-            # تحليل صحة النبتة
+            # تحليل العناية
             # =========================
 
             if matched is not None:
@@ -414,10 +555,7 @@ if photo is not None:
                     recommendations = []
 
 
-                    # =========================
                     # رطوبة التربة
-                    # =========================
-
                     if soil < matched["soil"]:
 
                         problems.append(
@@ -440,10 +578,7 @@ if photo is not None:
                         )
 
 
-                    # =========================
                     # الإضاءة
-                    # =========================
-
                     if light < matched["light"]:
 
                         problems.append(
@@ -455,10 +590,7 @@ if photo is not None:
                         )
 
 
-                    # =========================
                     # الحرارة
-                    # =========================
-
                     if temperature < matched["min_temp"]:
 
                         problems.append(
@@ -482,7 +614,7 @@ if photo is not None:
 
 
                     # =========================
-                    # النتيجة
+                    # النتيجة النهائية
                     # =========================
 
                     st.markdown("## 🌱 النتيجة")
@@ -494,7 +626,6 @@ if photo is not None:
                             f"🌱 {matched['name']} بحالة ممتازة!"
                         )
 
-
                     else:
 
                         st.warning(
@@ -502,14 +633,20 @@ if photo is not None:
                         )
 
 
-                        st.markdown("### 🔍 الملاحظات")
+                        st.markdown(
+                            "### 🔍 الملاحظات"
+                        )
 
                         for problem in problems:
 
-                            st.write(problem)
+                            st.write(
+                                problem
+                            )
 
 
-                        st.markdown("### 💡 التوصيات")
+                        st.markdown(
+                            "### 💡 التوصيات"
+                        )
 
                         for recommendation in recommendations:
 
@@ -525,17 +662,27 @@ if photo is not None:
                     summary = pd.DataFrame({
 
                         "العنصر": [
+
                             "نوع النبتة",
+
                             "رطوبة التربة",
+
                             "الإضاءة",
+
                             "درجة الحرارة"
+
                         ],
 
                         "القيمة": [
+
                             matched["name"],
+
                             f"{soil}%",
+
                             f"{light}%",
+
                             f"{temperature}°C"
+
                         ]
 
                     })
@@ -559,11 +706,13 @@ if photo is not None:
                 "❌ حدث خطأ أثناء تشغيل نموذج التعرف."
             )
 
-            st.code(str(e))
+            st.code(
+                str(e)
+            )
 
 
 # =========================
-# عن المشروع
+# معلومات المشروع
 # =========================
 
 st.divider()
@@ -571,13 +720,17 @@ st.divider()
 st.markdown("## ℹ️ عن المشروع")
 
 st.write("""
-PlantCare AI هو نظام ذكي لمراقبة صحة النباتات الداخلية.
+🌱 **PlantCare AI**
+
+نظام ذكي يساعد المستخدم على التعرف على النباتات الداخلية من خلال صورة.
 
 📷 يصور المستخدم النبتة.
 
-🤖 يستخدم النظام نموذج تعلم آلي للتعرف على نوع النبتة من الصورة.
+🤖 يستخدم النظام نموذج ذكاء اصطناعي للتعرف على نوع النبتة.
 
-💧☀️🌡️ بعد التعرف عليها، يحلل النظام رطوبة التربة والإضاءة ودرجة الحرارة.
+💧☀️🌡️ بعد التعرف عليها، يمكن للمستخدم إدخال رطوبة التربة والإضاءة ودرجة الحرارة.
 
-🌱 ثم يقدم توصيات مناسبة للعناية بالنبتة.
+🌱 ثم يقدم النظام تحليلًا وتوصيات مناسبة للعناية بالنبتة.
+
+🪴 يحتوي النظام حاليًا على مجموعة من النباتات الداخلية الشائعة، ويمكن توسيعه مستقبلًا ليشمل عددًا أكبر من الأنواع.
 """)
