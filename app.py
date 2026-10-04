@@ -95,7 +95,7 @@ def load_model():
 
 
 # =========================
-# بيانات النباتات
+# بيانات النباتات والعناية بها
 # =========================
 
 plant_data = {
@@ -146,7 +146,39 @@ plant_data = {
         "light": 30,
         "min_temp": 15,
         "max_temp": 30
+    },
+
+    "Peperomia serpens": {
+        "name": "بيبروميا سيربنز 🌿",
+        "soil": 35,
+        "light": 45,
+        "min_temp": 18,
+        "max_temp": 30
     }
+}
+
+
+# =========================
+# ربط الأسماء العلمية
+# =========================
+
+plant_aliases = {
+
+    "Epipremnum aureum": "Pothos",
+
+    "Monstera deliciosa": "Monstera deliciosa",
+
+    "Dracaena trifasciata": "Snake plant",
+
+    "Sansevieria trifasciata": "Snake plant",
+
+    "Spathiphyllum wallisii": "Peace lily",
+
+    "Chlorophytum comosum": "Spider plant",
+
+    "Zamioculcas zamiifolia": "ZZ plant",
+
+    "Peperomia serpens": "Peperomia serpens"
 }
 
 
@@ -209,7 +241,7 @@ if photo is not None:
 
 
             # =========================
-            # تشغيل النموذج
+            # تشغيل الذكاء الاصطناعي
             # =========================
 
             with torch.no_grad():
@@ -242,8 +274,6 @@ if photo is not None:
 
                 species_map = json.load(f)
 
-
-            # ترتيب أرقام الأنواع بشكل صحيح
 
             labels = [
                 species_map[key]
@@ -282,26 +312,8 @@ if photo is not None:
 
 
             # =========================
-            # ربط الاسم العلمي باسم النبات
+            # البحث عن النبات
             # =========================
-
-            plant_aliases = {
-
-                "Epipremnum aureum": "Pothos",
-
-                "Monstera deliciosa": "Monstera deliciosa",
-
-                "Dracaena trifasciata": "Snake plant",
-
-                "Sansevieria trifasciata": "Snake plant",
-
-                "Spathiphyllum wallisii": "Peace lily",
-
-                "Chlorophytum comosum": "Spider plant",
-
-                "Zamioculcas zamiifolia": "ZZ plant"
-            }
-
 
             matched = None
 
@@ -326,7 +338,7 @@ if photo is not None:
                 )
 
                 st.metric(
-                    "نسبة الثقة",
+                    "🎯 نسبة الثقة",
                     f"{confidence:.1f}%"
                 )
 
@@ -338,12 +350,12 @@ if photo is not None:
                 )
 
                 st.info(
-                    "هذه النبتة ليست ضمن أنواع العناية الموجودة في المشروع حاليًا."
+                    "هذه النبتة غير مضافة إلى قاعدة العناية في المشروع حاليًا."
                 )
 
 
             # =========================
-            # عرض الاحتمالات
+            # احتمالات التعرف
             # =========================
 
             st.markdown("### 🔍 احتمالات التعرف")
@@ -403,7 +415,7 @@ if photo is not None:
 
 
                     # =========================
-                    # فحص رطوبة التربة
+                    # رطوبة التربة
                     # =========================
 
                     if soil < matched["soil"]:
@@ -429,7 +441,7 @@ if photo is not None:
 
 
                     # =========================
-                    # فحص الإضاءة
+                    # الإضاءة
                     # =========================
 
                     if light < matched["light"]:
@@ -444,7 +456,7 @@ if photo is not None:
 
 
                     # =========================
-                    # فحص درجة الحرارة
+                    # الحرارة
                     # =========================
 
                     if temperature < matched["min_temp"]:
@@ -470,7 +482,7 @@ if photo is not None:
 
 
                     # =========================
-                    # النتيجة النهائية
+                    # النتيجة
                     # =========================
 
                     st.markdown("## 🌱 النتيجة")
@@ -551,7 +563,7 @@ if photo is not None:
 
 
 # =========================
-# معلومات المشروع
+# عن المشروع
 # =========================
 
 st.divider()
