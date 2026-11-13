@@ -262,12 +262,22 @@ for scientific, arabic_name, soil, light, min_temp, max_temp in plants:
 # الكاميرا
 # ==========================================
 
-st.markdown("## 📷 صوري نبتتك")
+st.markdown("## 📷 صوري نبتتك أو ارفعي صورة")
 
-photo = st.camera_input(
-    "اضغطي هنا لفتح الكاميرا وتصوير النبتة"
-)
+upload_col, camera_col = st.columns(2)
 
+with upload_col:
+    uploaded_photo = st.file_uploader(
+        "📁 اختاري صورة من المعرض",
+        type=["jpg", "jpeg", "png"]
+    )
+
+with camera_col:
+    camera_photo = st.camera_input(
+        "📸 التقطي صورة للنبتة"
+    )
+
+photo = camera_photo if camera_photo is not None else uploaded_photo
 
 if photo is not None:
 
