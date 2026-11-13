@@ -1,6 +1,6 @@
 streamlit
 pandas
-transformers==4.57.3
+Pillow
 torch
 torchvision
-Pillow
+huggingface_hub
