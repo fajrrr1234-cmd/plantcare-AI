@@ -19,6 +19,9 @@ st.set_page_config(
 )
 
 st.markdown("""
+<style>
+
+/* الخلفية الرئيسية */
 .stApp,
 [data-testid="stAppViewContainer"],
 [data-testid="stMain"] {
@@ -28,10 +31,12 @@ st.markdown("""
     text-align: right;
 }
 
+/* الشريط العلوي */
 [data-testid="stHeader"] {
     background-color: #E5F1DF !important;
 }
 
+/* القائمة الجانبية */
 [data-testid="stSidebar"] {
     background-color: #B5D6A7 !important;
 }
@@ -40,11 +45,12 @@ st.markdown("""
     color: #174B32 !important;
 }
 
-h1, h2, h3, p, label,
-[data-testid="stMarkdownContainer"] {
+/* النصوص والعناوين */
+h1, h2, h3, h4, p, label {
     color: #174B32 !important;
 }
 
+/* عنوان المشروع */
 .title {
     color: #174B32 !important;
     text-align: center;
@@ -59,6 +65,7 @@ h1, h2, h3, p, label,
     margin-bottom: 25px;
 }
 
+/* الأزرار */
 .stButton button {
     background-color: #174B32 !important;
     color: white !important;
@@ -69,8 +76,10 @@ h1, h2, h3, p, label,
 
 .stButton button:hover {
     background-color: #246443 !important;
+    color: white !important;
 }
 
+/* رسائل النجاح والتنبيه */
 [data-testid="stAlert"] {
     background-color: #174B32 !important;
     border-radius: 15px !important;
@@ -80,6 +89,7 @@ h1, h2, h3, p, label,
     color: white !important;
 }
 
+/* رفع الصور والكاميرا */
 [data-testid="stFileUploader"],
 [data-testid="stCameraInput"] {
     background-color: #F5FAF2 !important;
@@ -88,6 +98,7 @@ h1, h2, h3, p, label,
     padding: 12px !important;
 }
 
+/* بطاقات النتائج */
 [data-testid="stMetric"] {
     background-color: #F5FAF2 !important;
     padding: 18px !important;
@@ -98,48 +109,43 @@ h1, h2, h3, p, label,
     color: #174B32 !important;
 }
 
+/* حقول الإدخال */
 input, textarea {
     background-color: #F5FAF2 !important;
     color: #174B32 !important;
     border-radius: 12px !important;
 }
 
+/* القوائم المنسدلة */
 div[data-baseweb="select"] > div {
     background-color: #F5FAF2 !important;
     color: #174B32 !important;
     border-radius: 12px !important;
 }
 
+/* الجداول */
 [data-testid="stDataFrame"] {
     background-color: #F5FAF2 !important;
     border-radius: 15px !important;
-    overflow: hidden;
 }
 
-hr {
-    border-color: #B5D6A7 !important;
-}
-
+/* أشرطة التقدم */
 .stProgress > div > div > div {
     background-color: #174B32 !important;
 }
 
+/* الصور */
 [data-testid="stImage"] img {
     border-radius: 16px !important;
 }
+
+/* الخطوط الفاصلة */
+hr {
+    border-color: #B5D6A7 !important;
+}
+
+</style>
 """, unsafe_allow_html=True)
-
-
-st.markdown(
-    '<div class="title">🌱 PlantCare AI</div>',
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    '<div class="subtitle">نظام ذكي للتعرف على النباتات ومراقبة صحتها</div>',
-    unsafe_allow_html=True
-)
-
 st.write(
     "📷 صوّري النبتة وسيحاول الذكاء الاصطناعي التعرف عليها تلقائيًا."
 )
