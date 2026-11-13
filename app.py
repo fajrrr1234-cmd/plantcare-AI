@@ -19,24 +19,114 @@ st.set_page_config(
 )
 
 st.markdown("""
-<style>
-.stApp {
+.stApp,
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"] {
+    background-color: #E5F1DF !important;
+    color: #174B32 !important;
     direction: rtl;
     text-align: right;
 }
 
+[data-testid="stHeader"] {
+    background-color: #E5F1DF !important;
+}
+
+[data-testid="stSidebar"] {
+    background-color: #B5D6A7 !important;
+}
+
+[data-testid="stSidebar"] * {
+    color: #174B32 !important;
+}
+
+h1, h2, h3, p, label,
+[data-testid="stMarkdownContainer"] {
+    color: #174B32 !important;
+}
+
 .title {
+    color: #174B32 !important;
     text-align: center;
     font-size: 42px;
     font-weight: bold;
 }
 
 .subtitle {
+    color: #174B32 !important;
     text-align: center;
     font-size: 19px;
     margin-bottom: 25px;
 }
-</style>
+
+.stButton button {
+    background-color: #174B32 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 14px !important;
+    padding: 12px 20px !important;
+}
+
+.stButton button:hover {
+    background-color: #246443 !important;
+}
+
+[data-testid="stAlert"] {
+    background-color: #174B32 !important;
+    border-radius: 15px !important;
+}
+
+[data-testid="stAlert"] * {
+    color: white !important;
+}
+
+[data-testid="stFileUploader"],
+[data-testid="stCameraInput"] {
+    background-color: #F5FAF2 !important;
+    border: 1px solid #B5D6A7 !important;
+    border-radius: 16px !important;
+    padding: 12px !important;
+}
+
+[data-testid="stMetric"] {
+    background-color: #F5FAF2 !important;
+    padding: 18px !important;
+    border-radius: 15px !important;
+}
+
+[data-testid="stMetric"] * {
+    color: #174B32 !important;
+}
+
+input, textarea {
+    background-color: #F5FAF2 !important;
+    color: #174B32 !important;
+    border-radius: 12px !important;
+}
+
+div[data-baseweb="select"] > div {
+    background-color: #F5FAF2 !important;
+    color: #174B32 !important;
+    border-radius: 12px !important;
+}
+
+[data-testid="stDataFrame"] {
+    background-color: #F5FAF2 !important;
+    border-radius: 15px !important;
+    overflow: hidden;
+}
+
+hr {
+    border-color: #B5D6A7 !important;
+}
+
+.stProgress > div > div > div {
+    background-color: #174B32 !important;
+}
+
+[data-testid="stImage"] img {
+    border-radius: 16px !important;
+}
 """, unsafe_allow_html=True)
 
 
